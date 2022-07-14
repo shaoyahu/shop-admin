@@ -29,7 +29,6 @@ router.beforeEach(async (to, from, next) => {
   // 如果用户登录了，就自动获取用户信息并存储在vuex中
   if (token) {
     let { menus } = await store.dispatch('getinfo')
-    console.log(menus)
     // 动态添加路由
     hasNewRoutes = addRoutes(menus)
   }
