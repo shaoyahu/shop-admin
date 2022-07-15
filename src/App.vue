@@ -7,6 +7,9 @@
 </template>
 
 <style>
+body {
+  @apply bg-gray-100;
+}
 #nprogress .bar {
   background-color: red !important;
   height: 3px !important;
