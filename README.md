@@ -10,3 +10,9 @@ This template should help get you started developing with Vue 3 in Vite. The tem
 
 - [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
 >>>>>>> b303c5a (the first push for shop-admin-study)
+
+
+笔记
+数字滚动动画
+第三方库
+npm i gsap --save
