@@ -6,9 +6,9 @@
       v-for="(item, index) in iconNavs"
       :key="index"
     >
-      <el-card shadow="hover">
+      <el-card shadow="hover" @click="$router.push(item.path)">
         <div class="flex flex-col items-center justify-center cursor-pointer">
-          <el-icon :size="25" :class="item.color"
+          <el-icon :size="16" :class="item.color"
             ><component :is="item.icon"
           /></el-icon>
           <span class="text-sm mt-2">{{ item.title }}</span>
@@ -60,7 +60,7 @@ const iconNavs = [
     icon: "set-up",
     color: "text-grey-500",
     title: "配置",
-    path: "/setting/list",
+    path: "/setting/base",
   },
   {
     icon: "files",
