@@ -21,6 +21,20 @@
     </div>
   </el-aside>
   <FormDrawer title="新增" ref="formDrawerRef" @submit="handleSubmit">
+    <!-- <el-form
+      :model="form"
+      ref="formRef"
+      :rules="rules"
+      label-width="80px"
+      :inline="false"
+    >
+      <el-form-item label="分类名称" prop="name">
+        <el-input v-model="form.name"></el-input>
+      </el-form-item>
+      <el-form-item label="排序" prop="order">
+        <el-input v-model="form.order"></el-input>
+      </el-form-item>
+    </el-form> -->
   </FormDrawer>
 </template>
 
@@ -63,14 +77,34 @@ getData();
 
 const formDrawerRef = ref(null);
 const handleCreate = () => {
-  formDrawerRef.value.open()
+  formDrawerRef.value.open();
 };
+
+const form = reactive({
+  name: "",
+  order: 50,
+});
+
+const rules = {
+  name: [
+    {
+      required: true,
+      message: "图库分类名称不能为空",
+      trigger: "blur",
+    },
+  ],
+};
+const formRef = ref(null);
 const handleSubmit = () => {
-  console.log('提交表单')
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    console.log("提交成功");
+  });
 };
+
 defineExpose({
-  handleCreate
-})
+  handleCreate,
+});
 </script>
 
 <style lang="scss" scoped>
