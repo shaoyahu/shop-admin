@@ -21,7 +21,7 @@
     </div>
   </el-aside>
   <FormDrawer title="新增" ref="formDrawerRef" @submit="handleSubmit">
-    <!-- <el-form
+    <el-form
       :model="form"
       ref="formRef"
       :rules="rules"
@@ -32,16 +32,16 @@
         <el-input v-model="form.name"></el-input>
       </el-form-item>
       <el-form-item label="排序" prop="order">
-        <el-input v-model="form.order"></el-input>
+        <el-input-number v-model="form.order" :min="0" :max="1000" />
       </el-form-item>
-    </el-form> -->
+    </el-form>
   </FormDrawer>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import AsideList from "./AsideList.vue";
-import { getImageClassList } from "@/api/image_class.js";
+import { getImageClassList, createImageClass } from "@/api/image_class.js";
 import FormDrawer from "./FormDrawer.vue";
 
 // 加载动画
@@ -75,6 +75,7 @@ function getData(p = null) {
 }
 getData();
 
+
 const formDrawerRef = ref(null);
 const handleCreate = () => {
   formDrawerRef.value.open();
@@ -98,7 +99,10 @@ const formRef = ref(null);
 const handleSubmit = () => {
   formRef.value.validate((valid) => {
     if (!valid) return;
-    console.log("提交成功");
+    createImageClass(form).then((res)=>{
+
+      console.log(res)
+    })
   });
 };
 

@@ -13,11 +13,3 @@ This template should help get you started developing with Vue 3 in Vite. The tem
 
 临时笔记
 
-安装echarts
-$ npm install echarts --save
-
-import * as echarts from 'echarts'
-使用加载
-myChart.showLoading();
-结束加载
-myChart.hideLoading();
