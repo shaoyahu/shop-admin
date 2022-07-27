@@ -6,6 +6,7 @@
         v-for="(item, index) in list"
         :key="index"
         @edit="handleEdit(item)"
+        @delete="handleDelete(item.id)"
       >
         {{ item.name }}
       </AsideList>
@@ -47,6 +48,7 @@ import {
   getImageClassList,
   createImageClass,
   updateImageClass,
+  deleteImageClass,
 } from "@/api/image_class.js";
 import FormDrawer from "./FormDrawer.vue";
 
@@ -136,6 +138,19 @@ const handleEdit = (item) => {
   form.name = item.name;
   form.order = item.order;
   formDrawerRef.value.open();
+};
+
+// 删除图库分类
+const handleDelete = (id) => {
+  loading.value = true;
+  deleteImageClass(id)
+    .then((res) => {
+      toast("删除成功")
+      getData()
+    })
+    .finally(() => {
+      loading.value = false;
+    });
 };
 
 defineExpose({
