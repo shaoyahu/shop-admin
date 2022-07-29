@@ -6,7 +6,7 @@
       text
       type="primary"
       size="small"
-      @click="$emit('edit')"
+      @click.stop="$emit('edit')"
     >
       <el-icon :size="12"><Edit /></el-icon>
     </el-button>
@@ -14,7 +14,7 @@
       title="是否要删除该分类?"
       confirm-button-text="确认"
       cancel-button-text="取消"
-      @confirm="$emit('delete')"
+      @confirm.stop="$emit('delete')"
     >
       <template #reference>
         <el-button class="px-1" text type="primary" size="small">

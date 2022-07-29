@@ -7,6 +7,7 @@
         :key="index"
         @edit="handleEdit(item)"
         @delete="handleDelete(item.id)"
+        @click="handleChangeActiveId(item.id)"
       >
         {{ item.name }}
       </AsideList>
@@ -55,6 +56,8 @@ import FormDrawer from "./FormDrawer.vue";
 // 加载动画
 const loading = ref(false);
 const list = ref([]);
+
+// 选中入库分类ID
 const activeID = ref(0);
 
 // 分页
@@ -74,7 +77,7 @@ function getData(p = null) {
       total.value = res.totalCount;
       let item = list.value[0];
       if (item) {
-        activeID.value = item.id;
+        handleChangeActiveId(item.id)
       }
     })
     .finally(() => {
@@ -145,13 +148,21 @@ const handleDelete = (id) => {
   loading.value = true;
   deleteImageClass(id)
     .then((res) => {
-      toast("删除成功")
-      getData()
+      toast("删除成功");
+      getData();
     })
     .finally(() => {
       loading.value = false;
     });
 };
+
+const emit = defineEmits(['change'])
+
+// 切换分类
+function handleChangeActiveId(id) {
+  activeID.value = id
+  emit('change',id)
+}
 
 defineExpose({
   handleCreate,

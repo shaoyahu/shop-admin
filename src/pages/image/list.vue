@@ -6,8 +6,8 @@
       >
     </el-header>
     <el-container>
-      <ImageAside ref="ImageAsideRef" />
-      <ImageMain />
+      <ImageAside ref="ImageAsideRef" @change="handleAsideChange" />
+      <ImageMain ref="ImageMainRef" />
     </el-container>
   </el-container>
 </template>
@@ -21,10 +21,15 @@ const windowHeight = window.innerHeight || document.body.clientHeight;
 const h = windowHeight - 64 - 44 - 40;
 
 const ImageAsideRef = ref(null);
+const ImageMainRef = ref(null)
 
 const handleOpenCreate = () => {
   ImageAsideRef.value.handleCreate();
 };
+
+const handleAsideChange = (image_class_id) => {
+  ImageMainRef.value.loadData(image_class_id)
+}
 </script>
 
 <style lang="scss" scoped>
