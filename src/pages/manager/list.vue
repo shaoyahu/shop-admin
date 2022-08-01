@@ -13,8 +13,36 @@
     </div>
     <!-- 表格内容 -->
     <el-table :data="tableData" stripe style="width: 100%" v-loading="loading">
-      <el-table-column prop="title" label="公告标题" />
-      <el-table-column prop="create_time" label="发布时间" width="180" />
+      <el-table-column label="管理员" width="200">
+        <template #default="scope">
+          <div class="flex items-center">
+            <el-avatar :size="40" :src="scope.row.avatar">
+              <img
+                src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"
+              />
+            </el-avatar>
+            <div class="ml-3">
+              <h6>{{ scope.row.username }}</h6>
+              <small>ID:{{ scope.row.id }}</small>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="所属管理员" align="center">
+        <template #default="scope">
+          {{ scope.row.role?.name || "-" }}
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" width="120">
+        <template #default="scope">
+          <el-switch
+            :modelValue="scope.row.status"
+            :active-value="1"
+            :inactive-value="0"
+          >
+          </el-switch>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="180" align="center">
         <template #default="scope">
           <el-button
@@ -25,7 +53,7 @@
             >修改</el-button
           >
           <el-popconfirm
-            title="是否要删除该公告?"
+            title="是否要删除该管理员?"
             confirm-button-text="确认"
             cancel-button-text="取消"
             @confirm="handleDelete(scope.row.id)"
@@ -80,6 +108,7 @@ import {
   updateNotice,
 } from "@/api/notice";
 import FormDrawer from "@/components/FormDrawer.vue";
+import { getManagerList } from "@/api/manager";
 import { toast } from "@/composables/util.js";
 
 const tableData = ref([]);
@@ -95,7 +124,7 @@ function getData(p = null) {
     currentPage.value = p;
   }
   loading.value = true;
-  getNoticeList(currentPage.value, { params: { limit: limit.value } })
+  getManagerList(currentPage.value)
     .then((res) => {
       tableData.value = res.list;
       total.value = res.totalCount;

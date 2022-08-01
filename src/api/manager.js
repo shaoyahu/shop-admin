@@ -22,3 +22,16 @@ export function logout() {
 export function updatePassword(data) {
   return axios.post('/admin/updatepassword', data)
 }
+
+// 获取所有管理员信息
+export function getManagerList(page, query = {}) {
+  let q = []
+  for (const key in query) {
+    if (query[key]) {
+      q.push(`${key}=${encodeURIComponent(query[key])}`)
+    }
+  }
+  let r = q.join('&')
+  r = r ? ('?' + r) : ''
+  return axios.get(`/admin/manager/${page}${r}`)
+}

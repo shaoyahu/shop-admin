@@ -95,6 +95,13 @@ const asyncRoutes = [{
   meta: {
     title: '配置'
   }
+}, {
+  path: '/manager/list',
+  name: '/manager/list',
+  component: () => import('@/pages/manager/list.vue'),
+  meta: {
+    title: '管理员管理'
+  }
 }]
 
 export const router = createRouter({

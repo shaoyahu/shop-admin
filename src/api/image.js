@@ -17,3 +17,5 @@ export function updateImage(id, name) {
   return axios.post(`/admin/image/${id}`, { name })
 }
 
+// 新增图片
+export const uploadImageAction = '/api/admin/image/upload'
