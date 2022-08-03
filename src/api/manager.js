@@ -1,6 +1,6 @@
 import axios from '@/axios.js'
 
-// 管理员登录
+// 管理员登录 body
 export function login(username, password) {
   return axios.post('/admin/login', {
     username,
@@ -18,12 +18,12 @@ export function logout() {
   return axios.post('/admin/logout')
 }
 
-// 修改密码
+// 修改密码 body
 export function updatePassword(data) {
   return axios.post('/admin/updatepassword', data)
 }
 
-// 获取所有管理员信息
+// 获取所有管理员信息 query
 export function getManagerList(page, query = {}) {
   let q = []
   for (const key in query) {
@@ -34,4 +34,26 @@ export function getManagerList(page, query = {}) {
   let r = q.join('&')
   r = r ? ('?' + r) : ''
   return axios.get(`/admin/manager/${page}${r}`)
+}
+
+// 修改管理员状态 body
+export function updateManagerStatus(id, status) {
+  return axios.post(`/admin/manager/${id}/update_status`, {
+    status
+  })
+}
+
+// 增加管理员 body
+export function createManager(data) {
+  return axios.post(`/admin/manager`, data)
+}
+
+// 修改管理员 body
+export function updateManager(id, data) {
+  return axios.post(`/admin/manager/${id}`, data)
+}
+
+// 删除管理员 
+export function deleteManager(id) {
+  return axios.post(`/admin/manager/${id}/delete`)
 }

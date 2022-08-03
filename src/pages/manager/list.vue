@@ -1,5 +1,25 @@
 <template>
   <el-card shadow="never" class="border-0">
+    <!-- 搜索 -->
+    <el-form :model="searchForm" label-width="80px" class="mb-3" size="small">
+      <el-row :gutter="20">
+        <el-col :span="8" :offset="0">
+          <el-form-item label="关键词">
+            <el-input
+              v-model="searchForm.keyword"
+              placeholder="管理员名称"
+              clearable
+            ></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" :offset="8">
+          <div class="flex items-center justify-end">
+            <el-button type="primary" @click="getData">搜索</el-button>
+            <el-button @click="resetSearchForm">重置</el-button>
+          </div>
+        </el-col>
+      </el-row>
+    </el-form>
     <!-- 新增/刷新 -->
     <div class="flex items-center justify-between mb-4">
       <el-button type="primary" size="small" @click="handleCreate"
@@ -28,7 +48,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="所属管理员" align="center">
+      <el-table-column label="所属角色" align="center">
         <template #default="scope">
           {{ scope.row.role?.name || "-" }}
         </template>
@@ -39,29 +59,37 @@
             :modelValue="scope.row.status"
             :active-value="1"
             :inactive-value="0"
+            @change="handleStatusChange($event, scope.row)"
+            :loading="scope.row.statusLoading"
+            :disabled="scope.row.super == 1"
           >
           </el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="180" align="center">
         <template #default="scope">
-          <el-button
-            type="primary"
-            size="small"
-            text
-            @click="handleUpdate(scope.row)"
-            >修改</el-button
-          >
-          <el-popconfirm
-            title="是否要删除该管理员?"
-            confirm-button-text="确认"
-            cancel-button-text="取消"
-            @confirm="handleDelete(scope.row.id)"
-          >
-            <template #reference>
-              <el-button size="small" type="danger" text>删除</el-button>
-            </template>
-          </el-popconfirm>
+          <small v-if="scope.row.super == 1" class="text-sm text-gray-500"
+            >暂无操作
+          </small>
+          <div v-else>
+            <el-button
+              type="primary"
+              size="small"
+              text
+              @click="handleUpdate(scope.row)"
+              >修改
+            </el-button>
+            <el-popconfirm
+              title="是否要删除该管理员?"
+              confirm-button-text="确认"
+              cancel-button-text="取消"
+              @confirm="handleDelete(scope.row.id)"
+            >
+              <template #reference>
+                <el-button size="small" type="danger" text>删除</el-button>
+              </template>
+            </el-popconfirm>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -83,16 +111,33 @@
         label-width="80px"
         :inline="false"
       >
-        <el-form-item label="公告标题" prop="title">
-          <el-input v-model="form.title" placeholder="公告标题"></el-input>
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="form.username" placeholder="用户名"></el-input>
         </el-form-item>
-        <el-form-item label="公告内容" prop="content">
-          <el-input
-            v-model="form.content"
-            placeholder="公告内容"
-            type="textarea"
-            :rows="5"
-          ></el-input>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="form.password" placeholder="密码"></el-input>
+        </el-form-item>
+        <el-form-item label="头像" prop="avatar">
+          <ChooseImage />
+        </el-form-item>
+        <el-form-item label="所属角色" prop="role_id">
+          <el-select v-model="form.role_id" placeholder="选择所属角色">
+            <el-option
+              v-for="item in roles"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态" prop="status">
+          <el-switch
+            v-model="form.status"
+            :active-value="1"
+            :inactive-value="0"
+          >
+          </el-switch>
         </el-form-item>
       </el-form>
     </FormDrawer>
@@ -101,15 +146,29 @@
 
 <script setup>
 import { ref, reactive, computed } from "vue";
-import {
-  getNoticeList,
-  createNotice,
-  deleteNotice,
-  updateNotice,
-} from "@/api/notice";
 import FormDrawer from "@/components/FormDrawer.vue";
-import { getManagerList } from "@/api/manager";
+import ChooseImage from "@/components/ChooseImage.vue";
+import {
+  getManagerList,
+  updateManagerStatus,
+  createManager,
+  updateManager,
+  deleteManager,
+} from "@/api/manager";
 import { toast } from "@/composables/util.js";
+
+// 关键词搜索
+const searchForm = reactive({
+  keyword: "",
+});
+// 重置关键词
+const resetSearchForm = () => {
+  searchForm.keyword = "";
+  getData();
+};
+
+// 角色身份数组
+const roles = ref([]);
 
 const tableData = ref([]);
 const loading = ref(false);
@@ -124,9 +183,14 @@ function getData(p = null) {
     currentPage.value = p;
   }
   loading.value = true;
-  getManagerList(currentPage.value)
+  getManagerList(currentPage.value, searchForm)
     .then((res) => {
-      tableData.value = res.list;
+      console.log(res);
+      tableData.value = res.list.map((o) => {
+        o.statusLoading = false;
+        return o;
+      });
+      roles.value = res.roles;
       total.value = res.totalCount;
     })
     .finally(() => {
@@ -139,21 +203,24 @@ getData();
 const formDrawerRef = ref(null);
 const formRef = ref(null);
 const form = reactive({
-  title: "",
-  content: "",
+  username: "",
+  password: "",
+  role_id: "",
+  status: 1,
+  avatar: "",
 });
 const rules = {
-  title: [
+  username: [
     {
       required: true,
-      message: "公告标题不能为空",
+      message: "用户名不能为空",
       trigger: "blur",
     },
   ],
-  content: [
+  password: [
     {
       required: true,
-      message: "公告内容不能为空",
+      message: "密码不能为空",
       trigger: "blur",
     },
   ],
@@ -163,8 +230,11 @@ const rules = {
 const handleCreate = () => {
   editId.value = 0;
   resetForm({
-    title: "",
-    content: "",
+    username: "",
+    password: "",
+    role_id: "",
+    status: 1,
+    avatar: "",
   });
   formDrawerRef.value.open();
 };
@@ -194,8 +264,8 @@ const handleSubmit = () => {
     formDrawerRef.value.showLoading();
 
     const fun = editId.value
-      ? updateNotice(editId.value, form)
-      : createNotice(form);
+      ? updateManager(editId.value, form)
+      : createManager(form);
     fun
       .then((res) => {
         toast(`${drawerTitle.value}成功`);
@@ -209,10 +279,10 @@ const handleSubmit = () => {
   });
 };
 
-// 删除公告
+// 删除管理员
 const handleDelete = (id) => {
   loading.value = true;
-  deleteNotice(id)
+  deleteManager(id)
     .then((res) => {
       toast("删除成功");
       getData(false);
@@ -227,5 +297,18 @@ const handleUpdate = (row) => {
   editId.value = row.id;
   resetForm(row);
   formDrawerRef.value.open();
+};
+
+// 改变管理员状态
+const handleStatusChange = (status, row) => {
+  row.statusLoading = true;
+  updateManagerStatus(row.id, status)
+    .then((res) => {
+      toast("修改状态成功");
+      row.status = status;
+    })
+    .finally(() => {
+      row.statusLoading = false;
+    });
 };
 </script>
