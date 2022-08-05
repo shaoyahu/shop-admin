@@ -2,11 +2,11 @@
   <el-container class="bg-white rounded" :style="{ height: h + 'px' }">
     <el-header class="image_header">
       <el-button type="primary" size="small" @click="handleOpenCreate"
-        >新增图片分类</el-button
-      >
+        >新增图片分类
+      </el-button>
       <el-button type="warning" size="small" @click="handleOpenUpload"
-        >上传图片</el-button
-      >
+        >上传图片
+      </el-button>
     </el-header>
     <el-container>
       <ImageAside ref="ImageAsideRef" @change="handleAsideChange" />
@@ -24,7 +24,7 @@ const windowHeight = window.innerHeight || document.body.clientHeight;
 const h = windowHeight - 64 - 44 - 40;
 
 const ImageAsideRef = ref(null);
-const ImageMainRef = ref(null)
+const ImageMainRef = ref(null);
 
 // 去新增图片分类
 const handleOpenCreate = () => {
@@ -33,13 +33,13 @@ const handleOpenCreate = () => {
 
 // 点击选中图片分类
 const handleAsideChange = (image_class_id) => {
-  ImageMainRef.value.loadData(image_class_id)
-}
+  ImageMainRef.value.loadData(image_class_id);
+};
 
 // 去上传图片
 const handleOpenUpload = () => {
-  ImageMainRef.value.openUploadFile()
-}
+  ImageMainRef.value.openUploadFile();
+};
 </script>
 
 <style lang="scss" scoped>

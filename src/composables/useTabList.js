@@ -52,7 +52,6 @@ export function useTabList() {
   };
 
   const removeTab = (t) => {
-    console.log(t);
     if (activeTab.value == t) {
       tabList.value.forEach((tab, index) => {
         if (tab.path == t) {

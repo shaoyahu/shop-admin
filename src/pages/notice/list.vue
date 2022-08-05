@@ -1,16 +1,7 @@
 <template>
   <el-card shadow="never" class="border-0">
     <!-- 新增/刷新 -->
-    <div class="flex items-center justify-between mb-4">
-      <el-button type="primary" size="small" @click="handleCreate"
-        >新增</el-button
-      >
-      <el-tooltip effect="dark" content="刷新数据" placement="top">
-        <el-button text @click="getData">
-          <el-icon :size="20"><Refresh /></el-icon>
-        </el-button>
-      </el-tooltip>
-    </div>
+    <ListHeader @create="handleCreate" @refresh="getData" />
     <!-- 表格内容 -->
     <el-table :data="tableData" stripe style="width: 100%" v-loading="loading">
       <el-table-column prop="title" label="公告标题" />
@@ -80,123 +71,64 @@ import {
   updateNotice,
 } from "@/api/notice";
 import FormDrawer from "@/components/FormDrawer.vue";
+import ListHeader from "@/components/ListHeader.vue";
 import { toast } from "@/composables/util.js";
+import { useInitTable, useInitForm } from "@/composables/useCommon";
 
-const tableData = ref([]);
-const loading = ref(false);
-// 分页
-const currentPage = ref(1);
-const total = ref(0);
-const limit = ref(5);
+const limit = ref(3);
 
-// 获取数据
-function getData(p = null) {
-  if (typeof p == "number") {
-    currentPage.value = p;
-  }
-  loading.value = true;
-  getNoticeList(currentPage.value, { params: { limit: limit.value } })
-    .then((res) => {
-      tableData.value = res.list;
-      total.value = res.totalCount;
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
-getData();
-
-// 新增的抽屉表单
-const formDrawerRef = ref(null);
-const formRef = ref(null);
-const form = reactive({
-  title: "",
-  content: "",
+const {
+  searchForm,
+  resetSearchForm,
+  tableData,
+  loading,
+  currentPage,
+  total,
+  getData,
+  handleDelete,
+} = useInitTable({
+  searchForm: {
+    params: {
+      limit,
+    },
+  },
+  getList: getNoticeList,
+  delete: deleteNotice,
 });
-const rules = {
-  title: [
-    {
-      required: true,
-      message: "公告标题不能为空",
-      trigger: "blur",
-    },
-  ],
-  content: [
-    {
-      required: true,
-      message: "公告内容不能为空",
-      trigger: "blur",
-    },
-  ],
-};
 
-// 打开新增公告抽屉
-const handleCreate = () => {
-  editId.value = 0;
-  resetForm({
+const {
+  formDrawerRef,
+  formRef,
+  form,
+  rules,
+  handleCreate,
+  drawerTitle,
+  resetForm,
+  handleSubmit,
+  handleUpdate,
+} = useInitForm({
+  form: {
     title: "",
     content: "",
-  });
-  formDrawerRef.value.open();
-};
-
-// 标记判断是新增还是修改
-const editId = ref(0);
-const drawerTitle = computed(() => (editId.value ? "修改" : "新增"));
-
-// 重置表单
-function resetForm(row = false) {
-  if (formRef.value) {
-    formRef.value.clearValidate();
-  }
-  if (row) {
-    for (const key in form) {
-      form[key] = row[key];
-    }
-  }
-}
-
-// 抽屉确定按钮  新增 / 修改
-const handleSubmit = () => {
-  formRef.value.validate((valid) => {
-    if (!valid) {
-      return;
-    }
-    formDrawerRef.value.showLoading();
-
-    const fun = editId.value
-      ? updateNotice(editId.value, form)
-      : createNotice(form);
-    fun
-      .then((res) => {
-        toast(`${drawerTitle.value}成功`);
-        getData(editId.value ? false : 1);
-        // editId.value ? getData(false) : getData(1);
-        formDrawerRef.value.close();
-      })
-      .finally(() => {
-        formDrawerRef.value.hideLoading();
-      });
-  });
-};
-
-// 删除公告
-const handleDelete = (id) => {
-  loading.value = true;
-  deleteNotice(id)
-    .then((res) => {
-      toast("删除成功");
-      getData(false);
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-};
-
-// 去修改公告
-const handleUpdate = (row) => {
-  editId.value = row.id;
-  resetForm(row);
-  formDrawerRef.value.open();
-};
+  },
+  getData,
+  update: updateNotice,
+  create: createNotice,
+  rule: {
+    title: [
+      {
+        required: true,
+        message: "公告标题不能为空",
+        trigger: "blur",
+      },
+    ],
+    content: [
+      {
+        required: true,
+        message: "公告内容不能为空",
+        trigger: "blur",
+      },
+    ],
+  },
+});
 </script>

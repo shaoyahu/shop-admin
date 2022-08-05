@@ -136,7 +136,6 @@ const handleCreate = () => {
 
 // 编辑
 const handleEdit = (item) => {
-  // console.log(item)
   editId.value = item.id;
   form.name = item.name;
   form.order = item.order;

@@ -21,16 +21,7 @@
       </el-row>
     </el-form>
     <!-- 新增/刷新 -->
-    <div class="flex items-center justify-between mb-4">
-      <el-button type="primary" size="small" @click="handleCreate"
-        >新增</el-button
-      >
-      <el-tooltip effect="dark" content="刷新数据" placement="top">
-        <el-button text @click="getData">
-          <el-icon :size="20"><Refresh /></el-icon>
-        </el-button>
-      </el-tooltip>
-    </div>
+    <ListHeader @create="handleCreate" @refresh="getData" />
     <!-- 表格内容 -->
     <el-table :data="tableData" stripe style="width: 100%" v-loading="loading">
       <el-table-column label="管理员" width="200">
@@ -118,7 +109,7 @@
           <el-input v-model="form.password" placeholder="密码"></el-input>
         </el-form-item>
         <el-form-item label="头像" prop="avatar">
-          <ChooseImage />
+          <ChooseImage v-model="form.avatar" />
         </el-form-item>
         <el-form-item label="所属角色" prop="role_id">
           <el-select v-model="form.role_id" placeholder="选择所属角色">
@@ -145,7 +136,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue";
+import { ref } from "vue";
+import ListHeader from "@/components/ListHeader.vue";
 import FormDrawer from "@/components/FormDrawer.vue";
 import ChooseImage from "@/components/ChooseImage.vue";
 import {
@@ -155,160 +147,75 @@ import {
   updateManager,
   deleteManager,
 } from "@/api/manager";
-import { toast } from "@/composables/util.js";
 
-// 关键词搜索
-const searchForm = reactive({
-  keyword: "",
-});
-// 重置关键词
-const resetSearchForm = () => {
-  searchForm.keyword = "";
-  getData();
-};
+import { useInitTable, useInitForm } from "@/composables/useCommon";
 
 // 角色身份数组
 const roles = ref([]);
-
-const tableData = ref([]);
-const loading = ref(false);
-// 分页
-const currentPage = ref(1);
-const total = ref(0);
-const limit = ref(5);
-
-// 获取数据
-function getData(p = null) {
-  if (typeof p == "number") {
-    currentPage.value = p;
-  }
-  loading.value = true;
-  getManagerList(currentPage.value, searchForm)
-    .then((res) => {
-      console.log(res);
-      tableData.value = res.list.map((o) => {
-        o.statusLoading = false;
-        return o;
-      });
-      roles.value = res.roles;
-      total.value = res.totalCount;
-    })
-    .finally(() => {
-      loading.value = false;
+const {
+  searchForm,
+  resetSearchForm,
+  tableData,
+  loading,
+  currentPage,
+  total,
+  limit,
+  getData,
+  handleDelete,
+  handleStatusChange,
+} = useInitTable({
+  searchForm: {
+    keyword: "",
+  },
+  getList: getManagerList,
+  delete: deleteManager,
+  updateStatus: updateManagerStatus,
+  onGetListSuccess: (res) => {
+    tableData.value = res.list.map((o) => {
+      o.statusLoading = false;
+      return o;
     });
-}
-getData();
-
-// 新增的抽屉表单
-const formDrawerRef = ref(null);
-const formRef = ref(null);
-const form = reactive({
-  username: "",
-  password: "",
-  role_id: "",
-  status: 1,
-  avatar: "",
+    roles.value = res.roles;
+    total.value = res.totalCount;
+  },
 });
-const rules = {
-  username: [
-    {
-      required: true,
-      message: "用户名不能为空",
-      trigger: "blur",
-    },
-  ],
-  password: [
-    {
-      required: true,
-      message: "密码不能为空",
-      trigger: "blur",
-    },
-  ],
-};
 
-// 打开新增公告抽屉
-const handleCreate = () => {
-  editId.value = 0;
-  resetForm({
+const {
+  formDrawerRef,
+  formRef,
+  form,
+  rules,
+  handleCreate,
+  drawerTitle,
+  resetForm,
+  handleSubmit,
+  handleUpdate,
+} = useInitForm({
+  form: {
     username: "",
     password: "",
     role_id: "",
     status: 1,
     avatar: "",
-  });
-  formDrawerRef.value.open();
-};
-
-// 标记判断是新增还是修改
-const editId = ref(0);
-const drawerTitle = computed(() => (editId.value ? "修改" : "新增"));
-
-// 重置表单
-function resetForm(row = false) {
-  if (formRef.value) {
-    formRef.value.clearValidate();
-  }
-  if (row) {
-    for (const key in form) {
-      form[key] = row[key];
-    }
-  }
-}
-
-// 抽屉确定按钮  新增 / 修改
-const handleSubmit = () => {
-  formRef.value.validate((valid) => {
-    if (!valid) {
-      return;
-    }
-    formDrawerRef.value.showLoading();
-
-    const fun = editId.value
-      ? updateManager(editId.value, form)
-      : createManager(form);
-    fun
-      .then((res) => {
-        toast(`${drawerTitle.value}成功`);
-        getData(editId.value ? false : 1);
-        // editId.value ? getData(false) : getData(1);
-        formDrawerRef.value.close();
-      })
-      .finally(() => {
-        formDrawerRef.value.hideLoading();
-      });
-  });
-};
-
-// 删除管理员
-const handleDelete = (id) => {
-  loading.value = true;
-  deleteManager(id)
-    .then((res) => {
-      toast("删除成功");
-      getData(false);
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-};
-
-// 去修改公告
-const handleUpdate = (row) => {
-  editId.value = row.id;
-  resetForm(row);
-  formDrawerRef.value.open();
-};
-
-// 改变管理员状态
-const handleStatusChange = (status, row) => {
-  row.statusLoading = true;
-  updateManagerStatus(row.id, status)
-    .then((res) => {
-      toast("修改状态成功");
-      row.status = status;
-    })
-    .finally(() => {
-      row.statusLoading = false;
-    });
-};
+  },
+  getData,
+  update: updateManager,
+  create: createManager,
+  rule: {
+    username: [
+      {
+        required: true,
+        message: "用户名不能为空",
+        trigger: "blur",
+      },
+    ],
+    password: [
+      {
+        required: true,
+        message: "密码不能为空",
+        trigger: "blur",
+      },
+    ],
+  },
+});
 </script>

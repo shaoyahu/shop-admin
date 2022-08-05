@@ -12,6 +12,7 @@
             shadow="hover"
             class="relative mb-3"
             :body-style="{ padding: 0 }"
+            :class="{ 'border-amber-500': item.checked }"
           >
             <el-image
               :src="item.url"
@@ -23,13 +24,19 @@
             ></el-image>
             <div class="image_title">{{ item.name }}</div>
             <div class="flex items-center justify-center p-2">
+              <el-checkbox
+                v-model="item.checked"
+                @change="handleChooseChange(item)"
+                v-if="openChoose"
+              />
+
               <el-button
                 type="primary"
                 size="small"
                 text
                 @click="handleEdit(item)"
-                >重命名</el-button
-              >
+                >重命名
+              </el-button>
               <el-popconfirm
                 title="是否删除该图片?"
                 confirm-button-text="确认"
@@ -89,7 +96,10 @@ function getData(p = null) {
   loading.value = true;
   getImageList(image_class_id.value, currentPage.value)
     .then((res) => {
-      list.value = res.list;
+      list.value = res.list.map((o) => {
+        o.checked = false;
+        return o;
+      });
       total.value = res.totalCount;
     })
     .finally(() => {
@@ -118,9 +128,6 @@ const handleEdit = (item) => {
           loading.value = false;
         });
     })
-    .catch(() => {
-      console.log("取消重命名");
-    });
 };
 
 // 删除图片
@@ -138,8 +145,31 @@ const handleDelete = (id) => {
 
 // 图片上传成功回调
 const handleUploadSuccess = () => {
-  getData(1)
-}
+  getData(1);
+};
+
+defineProps({
+  openChoose:{
+    type:Boolean,
+    default:false
+  }
+})
+
+// 选中的图片
+const emit = defineEmits(["choose"]);
+const checkedImage = computed(() => {
+  return list.value.filter((item) => {
+    return item.checked == true;
+  });
+});
+
+const handleChooseChange = (item) => {
+  if (item.checked && checkedImage.value.length > 1) {
+    item.checked = false;
+    return toast("最多只能选中一张", "error");
+  }
+  emit('choose',checkedImage.value)
+};
 
 // 导出/暴露出 当前组件拥有的方法
 defineExpose({
