@@ -72,6 +72,30 @@ export function useInitTable(opt = {}) {
       });
   };
 
+  // 多选选中ID
+  const multiSelectIds = ref([]);
+  const handleSelectionChange = (e) => {
+    multiSelectIds.value = e.map((o) => {
+      return o.id;
+    });
+  };
+  const multipleTableRef = ref(null);
+  // 批量删除
+  const handleMultiDelete = () => {
+    loading.value = true;
+    opt.delete(multiSelectIds.value)
+      .then((res) => {
+        toast("删除成功");
+        // 清空选中
+        if (multipleTableRef.value) {
+          multipleTableRef.value.clearSelection();
+        }
+        getData()
+      })
+      .finally(() => {
+        loading.value = false;
+      });
+  };
 
   return {
     searchForm,
@@ -83,7 +107,10 @@ export function useInitTable(opt = {}) {
     limit,
     getData,
     handleDelete,
-    handleStatusChange
+    handleStatusChange,
+    handleSelectionChange,
+    multipleTableRef,
+    handleMultiDelete
   }
 }
 
@@ -127,9 +154,16 @@ export function useInitForm(opt = {}) {
       }
       formDrawerRef.value.showLoading();
 
+      let body = {}
+      if (opt.beforeSubmit && typeof opt.beforeSubmit == "function") {
+        body = opt.beforeSubmit({ ...form })
+      } else {
+        body = form
+      }
+
       const fun = editId.value
         ? opt.update(editId.value, form)
-        : opt.create(form);
+        : opt.create(body);
       fun
         .then((res) => {
           toast(`${drawerTitle.value}成功`);

@@ -121,7 +121,7 @@ const asyncRoutes = [{
   name: '/skus/list',
   component: () => import('@/pages/skus/list.vue'),
   meta: {
-    title: '商品规格管理'
+    title: '规格管理'
   }
 }]
 
