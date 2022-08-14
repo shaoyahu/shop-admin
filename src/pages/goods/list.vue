@@ -282,6 +282,8 @@ const handleSetGoodsBanners = (row) => {
   bannersRef.value.open(row)
 }
 
+const a = '赶紧删除这个变量，这个变量玩去哪没有做哟很棒'
+
 </script>
 
 <style lang='scss' scoped>
