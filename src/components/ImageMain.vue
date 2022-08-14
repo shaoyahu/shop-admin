@@ -2,47 +2,19 @@
   <el-main class="image_main" v-loading="loading">
     <div class="top p-3">
       <el-row :gutter="10">
-        <el-col
-          v-for="(item, index) in list"
-          :key="index"
-          :span="6"
-          :offset="0"
-        >
-          <el-card
-            shadow="hover"
-            class="relative mb-3"
-            :body-style="{ padding: 0 }"
-            :class="{ 'border-amber-500': item.checked }"
-          >
-            <el-image
-              :src="item.url"
-              fit="cover"
-              :lazy="true"
-              class="w-full h-[150px]"
-              :preview-src-list="[item.url]"
-              :initial-index="0"
-            ></el-image>
+        <el-col v-for="(item, index) in list" :key="index" :span="6" :offset="0">
+          <el-card shadow="hover" class="relative mb-3" :body-style="{ padding: 0 }"
+            :class="{ 'border-amber-500': item.checked }">
+            <el-image :src="item.url" fit="cover" :lazy="true" class="w-full h-[150px]" :preview-src-list="[item.url]"
+              :initial-index="0"></el-image>
             <div class="image_title">{{ item.name }}</div>
             <div class="flex items-center justify-center p-2">
-              <el-checkbox
-                v-model="item.checked"
-                @change="handleChooseChange(item)"
-                v-if="openChoose"
-              />
+              <el-checkbox v-model="item.checked" @change="handleChooseChange(item)" v-if="openChoose" />
 
-              <el-button
-                type="primary"
-                size="small"
-                text
-                @click="handleEdit(item)"
-                >重命名
+              <el-button type="primary" size="small" text @click="handleEdit(item)">重命名
               </el-button>
-              <el-popconfirm
-                title="是否删除该图片?"
-                confirm-button-text="确认"
-                cancel-button-text="取消"
-                @confirm="handleDelete(item.id)"
-              >
+              <el-popconfirm title="是否删除该图片?" confirm-button-text="确认" cancel-button-text="取消"
+                @confirm="handleDelete(item.id)">
                 <template #reference>
                   <el-button type="primary" size="small" text>删除</el-button>
                 </template>
@@ -53,14 +25,8 @@
       </el-row>
     </div>
     <div class="bottom">
-      <el-pagination
-        background
-        layout="prev, pager, next"
-        :total="total"
-        :current-page="currentPage"
-        :page-size="limit"
-        @current-change="getData"
-      />
+      <el-pagination background layout="prev, pager, next" :total="total" :current-page="currentPage" :page-size="limit"
+        @current-change="getData" />
     </div>
   </el-main>
   <el-drawer v-model="drawer" title="上传图片">
@@ -73,6 +39,7 @@ import { ref, reactive, computed } from "vue";
 import { getImageList, deleteImage, updateImage } from "@/api/image.js";
 import { showPrompt, toast } from "@/composables/util.js";
 import UploadFile from "./UploadFile.vue";
+import { number } from "echarts";
 
 // 上传图片
 const drawer = ref(false);
@@ -148,10 +115,14 @@ const handleUploadSuccess = () => {
   getData(1);
 };
 
-defineProps({
-  openChoose:{
-    type:Boolean,
-    default:false
+const props = defineProps({
+  openChoose: {
+    type: Boolean,
+    default: false
+  },
+  limit: {
+    type: Number,
+    default: 1
   }
 })
 
@@ -164,11 +135,11 @@ const checkedImage = computed(() => {
 });
 
 const handleChooseChange = (item) => {
-  if (item.checked && checkedImage.value.length > 1) {
+  if (item.checked && checkedImage.value.length > props.limit) {
     item.checked = false;
-    return toast("最多只能选中一张", "error");
+    return toast(`最多只能选中${props.limit}张`, "error");
   }
-  emit('choose',checkedImage.value)
+  emit('choose', checkedImage.value)
 };
 
 // 导出/暴露出 当前组件拥有的方法
@@ -181,6 +152,7 @@ defineExpose({
 <style lang="scss" scoped>
 .image_main {
   position: relative;
+
   .top {
     position: absolute;
     top: 0;
@@ -188,6 +160,7 @@ defineExpose({
     left: 0;
     bottom: 50px;
     overflow-y: auto;
+
     .image_title {
       position: absolute;
       top: 135px;
@@ -196,6 +169,7 @@ defineExpose({
       @apply text-sm truncate text-gray-100 bg-opacity-50 bg-gray-800 px-2 py-1;
     }
   }
+
   .bottom {
     @apply flex items-center justify-center;
     position: absolute;

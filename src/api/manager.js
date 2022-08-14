@@ -1,4 +1,6 @@
 import axios from '@/axios.js'
+import { queryParams } from '@/composables/util'
+
 
 // 管理员登录 body
 export function login(username, password) {
@@ -25,14 +27,7 @@ export function updatePassword(data) {
 
 // 获取所有管理员信息 query
 export function getManagerList(page, query = {}) {
-  let q = []
-  for (const key in query) {
-    if (query[key]) {
-      q.push(`${key}=${encodeURIComponent(query[key])}`)
-    }
-  }
-  let r = q.join('&')
-  r = r ? ('?' + r) : ''
+  let r = queryParams()
   return axios.get(`/admin/manager/${page}${r}`)
 }
 
