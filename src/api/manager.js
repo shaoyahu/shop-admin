@@ -27,7 +27,7 @@ export function updatePassword(data) {
 
 // 获取所有管理员信息 query
 export function getManagerList(page, query = {}) {
-  let r = queryParams()
+  let r = queryParams(query)
   return axios.get(`/admin/manager/${page}${r}`)
 }
 
