@@ -1,6 +1,6 @@
 <template>
   <span>
-    <div v-if="modelValue">
+    <div v-if="modelValue && preview">
       <el-image v-if="typeof modelValue == 'string'" :src="modelValue" fit="cover"
         class="w-[100px] h-[100px] rounded border mr-2"></el-image>
       <div v-else class="flex flex-wrap">
@@ -13,7 +13,7 @@
         </div>
       </div>
     </div>
-    <div class="choose_image_btn" @click="open">
+    <div v-if="preview" class="choose_image_btn" @click="open">
       <el-icon :size="25" class="text-gray-500">
         <User />
       </el-icon>
@@ -43,21 +43,23 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import ImageAside from "@/components/ImageAside.vue";
-import ImageMain from "@/components/ImageMain.vue";
-import { toast } from "@/composables/util";
+import { ref } from "vue"
+import ImageAside from "@/components/ImageAside.vue"
+import ImageMain from "@/components/ImageMain.vue"
+import { toast } from "@/composables/util"
 
-const dialogVisible = ref(false);
+const dialogVisible = ref(false)
 
+const callbackFunction = ref(null)
 // 打开
-const open = () => {
-  dialogVisible.value = true;
-};
+const open = (callback = null) => {
+  callbackFunction.value = callback
+  dialogVisible.value = true
+}
 
 const close = () => {
-  dialogVisible.value = false;
-};
+  dialogVisible.value = false
+}
 
 // 确定
 const submit = () => {
@@ -65,56 +67,68 @@ const submit = () => {
   if (props.limit == 1) {
     value = urls[0]
   } else {
-    value = [...props.modelValue, ...urls]
+    value = props.preview ? [...props.modelValue, ...urls] : [...urls]
     if (value.length > props.limit) {
-      return toast(`最多还能选择${props.limit - props.modelValue.length}张`, 'error')
+      let limit = props.preview ? props.limit - props.modelValue.length : props.limit
+      return toast(`最多还能选择${limit}张`, 'error')
     }
   }
-  if (value) {
-    emit("update:modelValue", value);
+  if (value && props.preview) {
+    emit("update:modelValue", value)
   }
-  close();
-};
+  if (!props.preview && typeof callbackFunction.value === "function") {
+    callbackFunction.value(value)
+  }
+  close()
+}
 
-const ImageAsideRef = ref(null);
-const ImageMainRef = ref(null);
+const ImageAsideRef = ref(null)
+const ImageMainRef = ref(null)
 
 // 去新增图片分类
 const handleOpenCreate = () => {
-  ImageAsideRef.value.handleCreate();
-};
+  ImageAsideRef.value.handleCreate()
+}
 
 // 点击选中图片分类
 const handleAsideChange = (image_class_id) => {
-  ImageMainRef.value.loadData(image_class_id);
-};
+  ImageMainRef.value.loadData(image_class_id)
+}
 
 // 去上传图片
 const handleOpenUpload = () => {
-  ImageMainRef.value.openUploadFile();
-};
+  ImageMainRef.value.openUploadFile()
+}
 
 const props = defineProps({
   modelValue: [String, Array],
   limit: {
     type: Number,
     default: 1
+  },
+  preview: {
+    type: Boolean,
+    default: true
   }
-});
-const emit = defineEmits(["update:modelValue"]);
+})
+const emit = defineEmits(["update:modelValue"])
 
 // 选中图片
-let urls = [];
+let urls = []
 const handleChoose = (e) => {
   urls = e.map((o) => {
-    return o.url;
-  });
-};
+    return o.url
+  })
+}
 
 // 删除图片
 const removeImage = (url) => {
-  emit("update:modelValue", props.modelValue.filter(u => u != url));
+  emit("update:modelValue", props.modelValue.filter(u => u != url))
 }
+
+defineExpose({
+  open
+})
 </script>
 
 
@@ -124,7 +138,7 @@ const removeImage = (url) => {
 }
 
 .image_header {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #eee ;
   @apply flex items-center;
 }
 </style>

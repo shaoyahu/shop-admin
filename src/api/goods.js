@@ -43,6 +43,10 @@ export function setGoodsBanner(id, data) {
   return axios.post(`/admin/goods/banners/${id}`, data)
 }
 
+// 修改商品规格 body
+export function updateGoodsSkus(id, data) {
+  return axios.post(`/admin/goods/updateskus/${id}`, data)
+}
 
 
 

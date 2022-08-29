@@ -37,14 +37,14 @@
               <el-image class="mr-3 rounded" :src="row.cover" fit="cover" :lazy="true" style="width:50px;height:50px">
               </el-image>
               <div class="flex-1">
-                <p>{{ row.title }}</p>
+                <p>{{  row.title  }}</p>
                 <div>
-                  <span class="text-rose-500">￥{{ row.min_price }}</span>
+                  <span class="text-rose-500">￥{{  row.min_price  }}</span>
                   <el-divider direction="vertical" />
-                  <span class="text-gray-500 text-xs">￥{{ row.min_oprice }}</span>
+                  <span class="text-gray-500 text-xs">￥{{  row.min_oprice  }}</span>
                 </div>
-                <p class="text-gray-400 text-xs mb-1">分类:{{ row.category ? row.category.name : '未分类' }}</p>
-                <p class="text-gray-400 text-xs">创建时间：{{ row.create_time }}</p>
+                <p class="text-gray-400 text-xs mb-1">分类:{{  row.category ? row.category.name : '未分类'  }}</p>
+                <p class="text-gray-400 text-xs">创建时间：{{  row.create_time  }}</p>
               </div>
             </div>
           </template>
@@ -52,7 +52,7 @@
         <el-table-column label="实际销量" prop="sale_count" align="center" />
         <el-table-column label="商品状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status ? 'success' : 'danger'" size="small">{{ row.status ? '上架' : '仓库' }}</el-tag>
+            <el-tag :type="row.status ? 'success' : 'danger'" size="small">{{  row.status ? '上架' : '仓库'  }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="审核状态" width="120" align="center" v-if="searchForm.tab != 'delete'">
@@ -61,7 +61,7 @@
               <el-button type="success" size="small" plain @click="">审核通过</el-button>
               <el-button class="mt-2 !ml-0" type="danger" size="small" plain @click="">审核拒绝</el-button>
             </div>
-            <span v-else>{{ row.ischeck == 1 ? '通过' : '拒绝' }}</span>
+            <span v-else>{{  row.ischeck == 1 ? '通过' : '拒绝'  }}</span>
           </template>
         </el-table-column>
         <el-table-column label="总库存" width="90" prop="stock" align="center" />
@@ -70,12 +70,13 @@
             <div v-if="searchForm.tab != 'delete'">
               <el-button class="px-1" type="primary" size="small" text @click="handleUpdate(scope.row)">修改
               </el-button>
-              <el-button class="px-1" type="primary" size="small" text>商品规格
+              <el-button class="px-1" type="primary" size="small" text @click="handleSetGoodsSkus(scope.row)" :loading="scope.row.skusLoading">商品规格
               </el-button>
               <el-button class="px-1" :type="scope.row.goods_banner.length == 0 ? 'danger' : 'primary'" size="small"
                 text @click="handleSetGoodsBanners(scope.row)" :loading="scope.row.bannersLoading">设置轮播图
               </el-button>
-              <el-button class="px-1" :type="scope.row.content.length == 0 ? 'danger' : 'primary'" size="small" text @click="handleSetGoodsContent(scope.row)" :loading="scope.row.contentLoading">商品详情
+              <el-button class="px-1" :type="!scope.row.content ? 'danger' : 'primary'" size="small" text
+                @click="handleSetGoodsContent(scope.row)" :loading="scope.row.contentLoading">商品详情
               </el-button>
               <el-popconfirm title="是否要删除该商品?" confirm-button-text="确认" cancel-button-text="取消"
                 @confirm="handleDelete(scope.row.id)">
@@ -149,6 +150,7 @@
     </el-card>
     <banners ref="bannersRef" @reloadData="getData" />
     <content ref="contentRef" @reloadData="getData" />
+    <skus ref="skusRef" @reloadData="getData" />
   </div>
 </template>
 
@@ -160,6 +162,7 @@ import ChooseImage from "@/components/ChooseImage.vue";
 import Search from "@/components/Search.vue";
 import SearchItem from "@/components/SearchItem.vue";
 import content from "./content.vue";
+import skus from "./skus.vue";
 import banners from "./banners.vue";
 import {
   getGoodsList,
@@ -201,6 +204,7 @@ const {
     tableData.value = res.list.map((o) => {
       o.bannersLoading = false;
       o.contentLoading = false;
+      o.skusLoading = false;
       return o;
     });
     total.value = res.totalCount;
@@ -287,8 +291,14 @@ const handleSetGoodsBanners = (row) => {
 
 // 设置商品详情
 const contentRef = ref(null)
-const handleSetGoodscontent = (row) => {
+const handleSetGoodsContent = (row) => {
   contentRef.value.open(row)
+}
+
+// 设置商品规格
+const skusRef = ref(null)
+const handleSetGoodsSkus = (row) => {
+  skusRef.value.open(row)
 }
 
 
