@@ -48,6 +48,27 @@ export function updateGoodsSkus(id, data) {
   return axios.post(`/admin/goods/updateskus/${id}`, data)
 }
 
+// 添加商品规格 body
+export function createGoodsSkusCard(data) {
+  return axios.post(`/admin/goods_skus_card`, data)
+}
+
+// 修改商品规格 body
+export function updateGoodsSkusCard(id, data) {
+  return axios.post(`/admin/goods_skus_card/${id}`, data)
+}
+
+
+// 删除商品选项 body
+export function deleteGoodsSkusCard(id) {
+  return axios.post(`/admin/goods_skus_card/${id}/delete`)
+}
+
+// 排序商品选项 body
+export function sortGoodsSkusCard(data) {
+  return axios.post(`/admin/goods_skus_card/sort`, data)
+}
+
 
 
 

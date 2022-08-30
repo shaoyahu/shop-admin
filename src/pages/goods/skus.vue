@@ -10,41 +10,33 @@
       <template v-if="form.sku_type == 0">
         <el-form-item label="市场价格">
           <el-input v-model="form.sku_value.oprice" style="width:35%">
-            <template #append>
-              元
-            </template>
+            <template #append>元</template>
           </el-input>
         </el-form-item>
         <el-form-item label="销售价格">
           <el-input v-model="form.sku_value.pprice" style="width:35%">
-            <template #append>
-              元
-            </template>
+            <template #append>元</template>
           </el-input>
         </el-form-item>
         <el-form-item label="成本价格">
           <el-input v-model="form.sku_value.cprice" style="width:35%">
-            <template #append>
-              元
-            </template>
+            <template #append>元</template>
           </el-input>
         </el-form-item>
         <el-form-item label="商品重量">
           <el-input v-model="form.sku_value.weight" style="width:35%">
-            <template #append>
-              公斤
-            </template>
+            <template #append>公斤</template>
           </el-input>
         </el-form-item>
         <el-form-item label="商品体积">
           <el-input v-model="form.sku_value.volume" style="width:35%">
-            <template #append>
-              立方米
-            </template>
+            <template #append>立方米</template>
           </el-input>
         </el-form-item>
       </template>
-      <template v-else>多规格</template>
+      <template v-else>
+        <SkuCard />
+      </template>
     </el-form>
   </FormDrawer>
 </template>
@@ -52,6 +44,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import FormDrawer from '@/components/FormDrawer.vue';
+import SkuCard from './components/SkuCard.vue';
 import {
   readGoods,
   updateGoods,
@@ -59,6 +52,11 @@ import {
 } from '@/api/goods'
 import { imageEmits } from 'element-plus';
 import { toast } from '@/composables/util';
+import {
+  goodsId,
+  initSkuCardList
+} from '@/composables/useSku'
+
 
 const formDrawerRef = ref(null)
 
@@ -73,8 +71,7 @@ const form = reactive({
   },
 })
 
-// 当前选中打开抽屉的商品ID
-const goodsId = ref(0)
+
 const open = (row) => {
   goodsId.value = row.id
   row.skusLoading = true
@@ -87,6 +84,7 @@ const open = (row) => {
       "weight": 0,
       "volume": 0
     }
+    initSkuCardList(res)
     formDrawerRef.value.open()
   }).finally(() => {
     row.skusLoading = false
