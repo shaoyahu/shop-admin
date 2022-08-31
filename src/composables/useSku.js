@@ -1,9 +1,12 @@
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import {
   createGoodsSkusCard,
   updateGoodsSkusCard,
   deleteGoodsSkusCard,
-  sortGoodsSkusCard
+  sortGoodsSkusCard,
+  createGoodsSkusCardValue,
+  updateGoodsSkusCardValue,
+  deleteGoodsSkusCardValue
 } from '@/api/goods'
 import {
   useArrayMoveUp,
@@ -104,10 +107,86 @@ export function sortCard(action, index) {
 
 // 初始化规格的值
 export function initSkusCardItem(id) {
+  const loading = ref(false)
   const item = sku_card_list.value.find(o => {
     return o.id == id
   })
+  const inputValue = ref('')
+  const inputVisible = ref(false)
+  const InputRef = ref()
+
+  const handleClose = (tag) => {
+    loading.value = true
+    deleteGoodsSkusCardValue(tag.id)
+      .then(res => {
+        let i = item.goodsSkusCardValue.findIndex(o=>{
+          return o.id == tag.id
+        })
+        if(i != -1){
+          item.goodsSkusCardValue.splice(i,1)
+        }
+      }).finally(() => {
+        loading.value = false
+      })
+  }
+
+  const showInput = () => {
+    inputVisible.value = true
+    nextTick(() => {
+      InputRef.value.input.focus()
+    })
+  }
+
+  const handleInputConfirm = () => {
+    if (!inputValue.value) {
+      inputVisible.value = false
+      return
+    }
+    loading.value = true
+    createGoodsSkusCardValue({
+      goods_skus_card_id: id,
+      name: item.name,
+      order: 50,
+      value: inputValue.value
+    }).then(res => {
+      item.goodsSkusCardValue.push({
+        ...res,
+        text: res.value
+      })
+    }).finally(() => {
+      inputVisible.value = false
+      inputValue.value = ''
+      loading.value = false
+    })
+
+  }
+
+  const handleChange = (value, tag) => {
+    loading.value = true
+    updateGoodsSkusCardValue(tag.id, {
+      "goods_skus_card_id": id, //规格ID
+      "name": item.name, //规格名称
+      "order": tag.order, //排序
+      "value": value //规格选项名称
+    }).then(res => {
+      tag.value = value
+    }).catch(err => {
+      tag.text = tag.value
+    })
+      .finally(() => {
+        loading.value = false
+      })
+  }
+
   return {
-    item
+    inputValue,
+    inputVisible,
+    InputRef,
+    handleClose,
+    showInput,
+    handleInputConfirm,
+    item,
+    loading,
+    handleChange
   }
 }

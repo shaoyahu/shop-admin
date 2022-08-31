@@ -69,6 +69,20 @@ export function sortGoodsSkusCard(data) {
   return axios.post(`/admin/goods_skus_card/sort`, data)
 }
 
+// 添加商品规格选项 body
+export function createGoodsSkusCardValue(data) {
+  return axios.post(`/admin/goods_skus_card_value`, data)
+}
+
+// 修改商品规格选项 body
+export function updateGoodsSkusCardValue(id, data) {
+  return axios.post(`/admin/goods_skus_card_value/${id}`, data)
+}
+
+// 删除商品规格选项 body
+export function deleteGoodsSkusCardValue(id) {
+  return axios.post(`/admin/goods_skus_card_value/${id}/delete`)
+}
 
 
 
