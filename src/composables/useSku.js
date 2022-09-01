@@ -1,4 +1,4 @@
-import { nextTick, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import {
   createGoodsSkusCard,
   updateGoodsSkusCard,
@@ -6,7 +6,8 @@ import {
   sortGoodsSkusCard,
   createGoodsSkusCardValue,
   updateGoodsSkusCardValue,
-  deleteGoodsSkusCardValue
+  deleteGoodsSkusCardValue,
+  chooseAndSetGoodsSkusCard
 } from '@/api/goods'
 import {
   useArrayMoveUp,
@@ -19,6 +20,8 @@ export const goodsId = ref(0)
 // 规格选项列表
 export const sku_card_list = ref([])
 
+export const sku_list = ref([])
+
 // 初始化规格选项列表
 export function initSkuCardList(d) {
   sku_card_list.value = d.goodsSkusCard.map(item => {
@@ -30,6 +33,7 @@ export function initSkuCardList(d) {
     })
     return item
   })
+  sku_list.value = d.goodsSkus
 }
 
 // 添加规格选项
@@ -105,6 +109,22 @@ export function sortCard(action, index) {
     })
 }
 
+// 选择设置规格
+export function handleChooseSetGoodsSkusCard(id, data) {
+  let item = sku_card_list.value.find(o => o.id == id)
+  item.loading = true
+  chooseAndSetGoodsSkusCard(id, data)
+    .then(res => {
+      item.name = item.text = res.goods_skus_card.name
+      item.goodsSkusCardValue = res.goods_skus_card_value.map(o => {
+        o.text = o.value || '属性值'
+        return o
+      })
+    }).finally(() => {
+      item.loading = false
+    })
+}
+
 // 初始化规格的值
 export function initSkusCardItem(id) {
   const loading = ref(false)
@@ -119,11 +139,11 @@ export function initSkusCardItem(id) {
     loading.value = true
     deleteGoodsSkusCardValue(tag.id)
       .then(res => {
-        let i = item.goodsSkusCardValue.findIndex(o=>{
+        let i = item.goodsSkusCardValue.findIndex(o => {
           return o.id == tag.id
         })
-        if(i != -1){
-          item.goodsSkusCardValue.splice(i,1)
+        if (i != -1) {
+          item.goodsSkusCardValue.splice(i, 1)
         }
       }).finally(() => {
         loading.value = false
@@ -188,5 +208,58 @@ export function initSkusCardItem(id) {
     item,
     loading,
     handleChange
+  }
+}
+
+
+// 初始化表格
+export function initSkuTable() {
+  const skuLabels = computed(() => {
+    return sku_card_list.value.filter(v => v.goodsSkusCardValue.length > 0)
+  })
+
+  // 获取表头
+  const tableThs = computed(() => {
+    let length = skuLabels.value.length
+    return [{
+      name: '商品规格',
+      colspan: length,
+      width: '',
+      rowspan: length > 0 ? 1 : 2
+    }, {
+      name: '销售价',
+      width: '100',
+      rowspan: 2
+    }, {
+      name: '市场价',
+      width: '100',
+      rowspan: 2
+    }, {
+      name: '成本价',
+      width: '100',
+      rowspan: 2
+    }, {
+      name: '库存',
+      width: '100',
+      rowspan: 2
+    }, {
+      name: '体积',
+      width: '100',
+      rowspan: 2
+    }, {
+      name: '重量',
+      width: '100',
+      rowspan: 2
+    }, {
+      name: '编码',
+      width: '100',
+      rowspan: 2
+    }]
+  })
+
+  return {
+    skuLabels,
+    tableThs,
+    sku_list
   }
 }

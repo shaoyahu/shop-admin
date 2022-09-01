@@ -36,6 +36,7 @@
       </template>
       <template v-else>
         <SkuCard />
+        <SkuTable />
       </template>
     </el-form>
   </FormDrawer>
@@ -45,6 +46,7 @@
 import { ref, reactive } from 'vue'
 import FormDrawer from '@/components/FormDrawer.vue';
 import SkuCard from './components/SkuCard.vue';
+import SkuTable from './components/SkuTable.vue';
 import {
   readGoods,
   updateGoods,
