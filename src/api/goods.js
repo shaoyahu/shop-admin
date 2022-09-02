@@ -32,6 +32,22 @@ export function deleteGoods(ids) {
   })
 }
 
+
+// 批量恢复商品 body
+export function restoreGoods(ids) {
+  return axios.post(`/admin/goods/restore`, {
+    ids
+  })
+}
+
+
+// 彻底删除商品 body
+export function destroyGoods(ids) {
+  return axios.post(`/admin/goods/destroy`, {
+    ids
+  })
+}
+
 // 查看商品资料
 export function readGoods(id) {
   return axios.get(`/admin/goods/read/${id}`)

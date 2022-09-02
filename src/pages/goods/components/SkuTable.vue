@@ -3,19 +3,42 @@
     <table class="border">
       <thead>
         <tr>
-          <th v-for="(th, thi) in tableThs" :key="thi">
+          <th v-for="(th, thi) in tableThs" :key="thi" :width="th.width" :rowspan="th.rowspan" :colspan="th.colspan">
             {{  th.name  }}
           </th>
         </tr>
         <tr>
           <th v-for="(th, thi) in skuLabels" :key="thi">
-            {{ th.name }}
+            {{  th.name  }}
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td></td>
+        <tr v-for="(item, index) in sku_list" :key="index">
+          <td width="100" class="border" v-for="(sku, skuI) in item.skus" :key="skuI">
+            {{ sku.value }}
+          </td>
+          <td class="border">
+            <el-input v-model="item.pprice" size="small" type="number"></el-input>
+          </td>
+          <td class="border">
+            <el-input v-model="item.oprice" size="small" type="number"></el-input>
+          </td>
+          <td class="border">
+            <el-input v-model="item.cprice" size="small" type="number"></el-input>
+          </td>
+          <td class="border">
+            <el-input v-model="item.store" size="small" type="number"></el-input>
+          </td>
+          <td class="border">
+            <el-input v-model="item.volume" size="small" type="number"></el-input>
+          </td>
+          <td class="border">
+            <el-input v-model="item.weight" size="small" type="number"></el-input>
+          </td>
+          <td class="border">
+            <el-input v-model="item.code" size="small"></el-input>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -32,6 +55,8 @@ const {
   tableThs,
   sku_list
 } = initSkuTable()
+
+console.log(sku_list)
 </script>
 
 <style lang='scss' scoped>

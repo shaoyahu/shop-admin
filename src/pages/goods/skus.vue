@@ -56,7 +56,8 @@ import { imageEmits } from 'element-plus';
 import { toast } from '@/composables/util';
 import {
   goodsId,
-  initSkuCardList
+  initSkuCardList,
+  sku_list
 } from '@/composables/useSku'
 
 
@@ -96,13 +97,21 @@ const open = (row) => {
 const emit = defineEmits(['reloadData'])
 const submit = () => {
   formDrawerRef.value.showLoading()
-  updateGoodsSkus(goodsId.value, form).then(res => {
-    toast('设置商品规格成功')
-    formDrawerRef.value.close()
-    emit('reloadData')
-  }).finally(() => {
-    formDrawerRef.value.hideLoading()
-  })
+  let data = {
+    sku_type: form.sku_type,
+    sku_value: form.sku_value
+  }
+  if (form.sku_type == 1) {
+    data.goodsSkus = sku_list.value
+  }
+  updateGoodsSkus(goodsId.value, data)
+    .then(res => {
+      toast('设置商品规格成功')
+      formDrawerRef.value.close()
+      emit('reloadData')
+    }).finally(() => {
+      formDrawerRef.value.hideLoading()
+    })
 }
 
 defineExpose({

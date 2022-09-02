@@ -11,7 +11,8 @@ import {
 } from '@/api/goods'
 import {
   useArrayMoveUp,
-  useArrayMoveDown
+  useArrayMoveDown,
+  cartesianProductof
 } from '@/composables/util'
 
 // 当前商品ID
@@ -84,6 +85,7 @@ export function handleDelete(item) {
     if (i != -1) {
       sku_card_list.value.splice(i, 1)
     }
+    getTableData()
   })
 }
 
@@ -104,6 +106,7 @@ export function sortCard(action, index) {
   sortGoodsSkusCard({ sortdata: sortData })
     .then(res => {
       func(sku_card_list.value, index)
+      getTableData()
     }).finally(() => {
       bodyLoading.value = false
     })
@@ -120,6 +123,7 @@ export function handleChooseSetGoodsSkusCard(id, data) {
         o.text = o.value || '属性值'
         return o
       })
+      getTableData()
     }).finally(() => {
       item.loading = false
     })
@@ -145,6 +149,7 @@ export function initSkusCardItem(id) {
         if (i != -1) {
           item.goodsSkusCardValue.splice(i, 1)
         }
+        getTableData()
       }).finally(() => {
         loading.value = false
       })
@@ -154,7 +159,9 @@ export function initSkusCardItem(id) {
     inputVisible.value = true
     nextTick(() => {
       InputRef.value.input.focus()
+
     })
+    getTableData()
   }
 
   const handleInputConfirm = () => {
@@ -173,6 +180,7 @@ export function initSkusCardItem(id) {
         ...res,
         text: res.value
       })
+      getTableData()
     }).finally(() => {
       inputVisible.value = false
       inputValue.value = ''
@@ -190,6 +198,7 @@ export function initSkusCardItem(id) {
       "value": value //规格选项名称
     }).then(res => {
       tag.value = value
+      getTableData()
     }).catch(err => {
       tag.text = tag.value
     })
@@ -262,4 +271,65 @@ export function initSkuTable() {
     tableThs,
     sku_list
   }
+}
+
+
+// 获取规格表格数据
+export function getTableData() {
+  setTimeout(() => {
+    if (sku_card_list.value.length === 0) {
+      return []
+    }
+
+    let list = []
+    sku_card_list.value.forEach(o => {
+      if (o.goodsSkusCardValue && o.goodsSkusCardValue.length > 0) {
+        list.push(o.goodsSkusCardValue)
+      }
+    })
+
+    if (list.length == 0) {
+      return []
+    }
+
+    let arr = cartesianProductof(...list)
+
+    // 获取之前的规格列表,将规格ID排序之后转化成字符串
+    let beforeSkuList = JSON.parse(JSON.stringify(sku_list.value)).map(o => {
+      if (!Array.isArray(o.skus)) {
+        o.skus = Object.keys(o.skus).map(k => o.skus[k])
+      }
+      o.skusId = o.skus.sort((a, b) => a.id - b.id).map(s => s.id).join(',')
+      return o
+    })
+
+    sku_list.value = []
+    sku_list.value = arr.map(skus => {
+
+      let o = getBeforeSkuItem(JSON.parse(JSON.stringify(skus)), beforeSkuList)
+
+      return {
+        code: o?.code || "",
+        cprice: o?.cprice || "0.00",
+        goods_id: goodsId.value,
+        image: o?.image || "",
+        oprice: o?.oprice || "0.00",
+        pprice: o?.pprice || "0.00",
+        skus,
+        stock: o?.stock || 0,
+        volume: o?.volume || 0,
+        weight: o?.weight || 0
+      }
+    })
+  }, 200);
+}
+
+function getBeforeSkuItem(skus, beforeSkuList) {
+  let skusId = skus.sort((a, b) => a.id - b.id).map(s => s.id).join(',')
+  return beforeSkuList.find(o => {
+    if (skus.length > o.skus.length) {
+      return skusId.indexOf(o.skusId) != -1
+    }
+    return o.skusId.indexOf(skusId) != -1
+  })
 }
