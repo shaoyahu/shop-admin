@@ -31,7 +31,8 @@ import ChooseGoods from '@/components/ChooseGoods.vue';
 
 import {
   getCategoryGoods,
-  deleteCategoryGoods
+  deleteCategoryGoods,
+  connectCategoryGoods
 } from '@/api/category'
 import { toast } from '@/composables/util';
 
@@ -72,7 +73,18 @@ const handleDelete = (row) => {
 
 const chooseGoodsRef = ref(null)
 const handleConnect = () => {
-  chooseGoodsRef.value.open()
+  chooseGoodsRef.value.open((goods_ids) => {
+    formDrawerRef.value.showLoading()
+    connectCategoryGoods({
+      category_id: category_id.value,
+      goods_ids
+    }).then(res => {
+      getData()
+      toast('关联成功')
+    }).finally(() => {
+      formDrawerRef.value.hideLoading()
+    })
+  })
 }
 
 defineExpose({
