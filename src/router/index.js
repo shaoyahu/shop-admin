@@ -137,6 +137,27 @@ const asyncRoutes = [{
   meta: {
     title: '支付设置'
   }
+}, {
+  path: '/setting/ship',
+  name: '/setting/ship',
+  component: () => import('@/pages/setting/ship.vue'),
+  meta: {
+    title: '物流设置'
+  }
+}, {
+  path: '/distribution/index',
+  name: '/distribution/index',
+  component: () => import('@/pages/distribution/index.vue'),
+  meta: {
+    title: '分销员管理'
+  }
+}, {
+  path: '/distribution/setting',
+  name: '/distribution/setting',
+  component: () => import('@/pages/distribution/setting.vue'),
+  meta: {
+    title: '分销设置'
+  }
 }]
 
 export const router = createRouter({
