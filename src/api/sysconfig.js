@@ -12,7 +12,7 @@ export function setSysconfig(data) {
 
 
 // 上传文件
-export const uploadAction = '/api/admin/sysconfig/upload'
+export const uploadAction = import.meta.env.VITE_APP_BASE_API + '/admin/sysconfig/upload'
 
 
 
